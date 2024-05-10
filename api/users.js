@@ -6,6 +6,15 @@ const { Review } = require('../models/review')
 
 const router = Router()
 
+
+/*
+  *Route to register new users
+*/
+router.post('/register', async function (req, res) {
+  const {id, username, email, password, admin} = req.body
+  const user = await User.create({ id,username, email, password, admin })
+  res.status(201).json({ user })
+}
 /*
  * Route to list all of a user's businesses.
  */
