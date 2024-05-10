@@ -8,14 +8,25 @@ const router = Router()
 
 
 /*
-  *Route to register new users
+  * Route to register new users
 */
-router.post('/register', async function (req, res) {
-  const {id, username, email, password, admin} = req.body
-  const user = await User.create({ id,username, email, password, admin })
+router.post('/users/login', async function (req, res) {
+  const {email, password} = req.body
+  const user = await User.create({email, password})
   res.status(201).json({ user })
 
 })
+
+/*
+  * Routes to the Specified User
+*/
+
+router.get('/:users/{userID}', async function (req, res) {
+  const userID = req.params.userID
+  const user = await User.findByPk(userID)
+  res.status(200).json({ user })
+})
+
 /*
  * Route to list all of a user's businesses.
  */
