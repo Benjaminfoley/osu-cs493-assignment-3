@@ -1,9 +1,30 @@
 const { Router } = require('express')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const { Business } = require('../models/business')
 const { Photo } = require('../models/photo')
 const { Review } = require('../models/review')
+
+function requireAuthentication(req, res, next) {
+  // Get the token from the request
+  const auth_header = req.get('Authorization') || ''
+  const header_parts = auth_header.split(' ')
+
+  const token = header_parts[0] == "Bearer"? header_parts[1]: null
+
+  try {
+    // verify that it's correct
+    const payload = jwt.verify(token, secret_key)
+    req.user = payload.sub
+    next()
+
+  } catch (err) {
+    res.status(401).json({"error": "invalid token"})
+  }
+}
+
+
 
 const router = Router()
 
@@ -11,7 +32,7 @@ const router = Router()
   * Route to register new users
 */
 
-router.post('/users/new', async function (req, res) {
+router.post('/users/new', requireAuthentication, async function (req, res) {
   try{
     const hashed_password = await bcrypt.hash(req.body.password, 8)
 
@@ -24,6 +45,13 @@ router.post('/users/new', async function (req, res) {
     res.json({"status": "error", "error": err}) 
   }
 })
+
+function generateAuthToken(user_id) {
+  const payload = { "sub": user_id };
+
+  return jwt.sign(payload, secret_key, { "expiresIn": "24h" });
+}
+
 /*
   * Route to register new users
 */
@@ -40,7 +68,8 @@ router.post('/login', async function (req, res) {
   const authenticated = await bcrypt.compare(req.body.password, results[0].password)
 
   if (authenticated) {
-    res.json({"status": "ok"})
+    const token = generateAuthToken(results[0].id)
+    res.json({"status": "ok", "token": token})
   }
   else {
     res.json({"status": "error", "error": "login failed"})
@@ -50,7 +79,6 @@ router.post('/login', async function (req, res) {
 /*
   * Routes to the Specified User
 */
-
 router.get('/:users/{userID}', async function (req, res) {
   const userID = req.params.userID
   const user = await User.findByPk(userID)
