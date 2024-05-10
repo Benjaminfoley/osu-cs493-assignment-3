@@ -1,4 +1,5 @@
 const { Router } = require('express')
+const bcrypt = require('bcryptjs')
 
 const { Business } = require('../models/business')
 const { Photo } = require('../models/photo')
@@ -6,15 +7,44 @@ const { Review } = require('../models/review')
 
 const router = Router()
 
-
 /*
   * Route to register new users
 */
-router.post('/users/login', async function (req, res) {
-  const {email, password} = req.body
-  const user = await User.create({email, password})
-  res.status(201).json({ user })
 
+router.post('/users/new', async function (req, res) {
+  try{
+    const hashed_password = await bcrypt.hash(req.body.password, 8)
+
+    const [ results ] = await mysqlPool.query(`INSERT INTO users
+      (name, email, password) VALUES (?, ?, ?);`,
+      [req.body.name, req.body.email, hashed_password])
+
+    res.json({"status": "ok"})
+  } catch(err) {
+    res.json({"status": "error", "error": err}) 
+  }
+})
+/*
+  * Route to register new users
+*/
+router.post('/login', async function (req, res) {
+  const [ results ] = await mysqlPool.query(
+    "SELECT * FROM users WHERE name = ?",
+    [req.body.name])
+
+  if (!results[0]) {
+    res.json({"status": "error", "error": "login failed"})
+    return
+  }
+
+  const authenticated = await bcrypt.compare(req.body.password, results[0].password)
+
+  if (authenticated) {
+    res.json({"status": "ok"})
+  }
+  else {
+    res.json({"status": "error", "error": "login failed"})
+  }
 })
 
 /*
