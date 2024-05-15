@@ -5,21 +5,43 @@ const { Review, ReviewClientFields } = require('../models/review')
 
 const router = Router()
 
+function requireAuthentication(req, res, next) {
+  // Get the token from the request
+  const auth_header = req.get('Authorization') || ''
+  const header_parts = auth_header.split(' ')
+
+  const token = header_parts[0] == "Bearer"? header_parts[1]: null
+
+  try {
+    // verify that it's correct
+    const payload = jwt.verify(token, secret_key)
+    req.user = payload.sub
+    next()
+
+  } catch (err) {
+    res.status(401).json({"error": "invalid token"})
+  }
+}
+
 /*
  * Route to create a new review.
  */
-router.post('/', async function (req, res, next) {
-  try {
-    const review = await Review.create(req.body, ReviewClientFields)
-    res.status(201).send({ id: review.id })
-  } catch (e) {
-    if (e instanceof ValidationError) {
-      res.status(400).send({ error: e.message })
-    } else {
-      throw e
+router.post('/', requireAuthentication, async function (req, res, next) {
+  const authorizedUser = req.user
+  if (authorizedUser == req.body.userId) {
+    try {
+      const review = await Review.create(req.body, ReviewClientFields)
+      res.status(201).send({ id: review.id })
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        res.status(400).send({ error: e.message })
+      } else {
+        throw e
+      }
     }
-  }
-})
+  } else {
+    res.status(403).json({"error": "invalid user"})
+  }})
 
 /*
  * Route to fetch info about a specific review.
