@@ -60,35 +60,44 @@ router.get('/:photoId', async function (req, res, next) {
 /*
  * Route to update a photo.
  */
-router.patch('/:photoId', async function (req, res, next) {
+router.patch('/:photoId', requireAuthentication, async function (req, res, next) {
   const photoId = req.params.photoId
-
+  const authorizedUser = req.user
   /*
    * Update photo without allowing client to update businessId or userId.
    */
-  const result = await Photo.update(req.body, {
-    where: { id: photoId },
-    fields: PhotoClientFields.filter(
-      field => field !== 'businessId' && field !== 'userId'
-    )
-  })
-  if (result[0] > 0) {
-    res.status(204).send()
-  } else {
-    next()
+  if (authorizedUser == req.body.userId) {
+    const result = await Photo.update(req.body, {
+      where: { id: photoId },
+      fields: PhotoClientFields.filter(
+        field => field !== 'businessId' && field !== 'userId'
+      )
+    })
+    if (result[0] > 0) {
+      res.status(204).send()
+    } else {
+      next()
+    }
+  }else {
+    res.status(403).json({"error": "Unauthorized"})
   }
 })
 
 /*
  * Route to delete a photo.
  */
-router.delete('/:photoId', async function (req, res, next) {
+router.delete('/:photoId',requireAuthentication, async function (req, res, next) {
   const photoId = req.params.photoId
-  const result = await Photo.destroy({ where: { id: photoId }})
-  if (result > 0) {
-    res.status(204).send()
-  } else {
-    next()
+  const authorizedUser = req.user
+  if (authorizedUser == req.body.userId) {
+    const result = await Photo.destroy({ where: { id: photoId }})
+    if (result > 0) {
+      res.status(204).send()
+    } else {
+      next()
+    }
+  }else {
+    res.status(403).json({"error": "Unauthorized"})
   }
 })
 
