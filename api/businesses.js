@@ -109,29 +109,39 @@ router.get('/:businessId',async function (req, res, next) {
 /*
  * Route to update data for a business.
  */
-router.patch('/:businessId', async function (req, res, next) {
+router.patch('/:businessId', requireAuthentication, async function (req, res, next) {
   const businessId = req.params.businessId
-  const result = await Business.update(req.body, {
-    where: { id: businessId },
-    fields: BusinessClientFields
-  })
-  if (result[0] > 0) {
-    res.status(204).send()
+  const authorizedUser = req.user
+  if (authorizedUser == req.body.ownerid) {
+    const result = await Business.update(req.body, {
+      where: { id: businessId },
+      fields: BusinessClientFields
+    })
+    if (result[0] > 0) {
+      res.status(204).send()
+    } else {
+      next()
+    }
   } else {
-    next()
+    res.status(403).json({"error": "Unauthorized"})
   }
 })
 
 /*
  * Route to delete a business.
  */
-router.delete('/:businessId', async function (req, res, next) {
+router.delete('/:businessId', requireAuthentication, async function (req, res, next) {
   const businessId = req.params.businessId
-  const result = await Business.destroy({ where: { id: businessId }})
-  if (result > 0) {
-    res.status(204).send()
+  const authorizedUser = req.user
+  if (authorizedUser == req.body.ownerid) {
+    const result = await Business.destroy({ where: { id: businessId }})
+    if (result > 0) {
+      res.status(204).send()
+    } else {
+      next()
+    }
   } else {
-    next()
+    res.status(403).json({"error": "Unauthorized"})
   }
 })
 
