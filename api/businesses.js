@@ -7,10 +7,28 @@ const { Review } = require('../models/review')
 
 const router = Router()
 
+function requireAuthentication(req, res, next) {
+  // Get the token from the request
+  const auth_header = req.get('Authorization') || ''
+  const header_parts = auth_header.split(' ')
+
+  const token = header_parts[0] == "Bearer"? header_parts[1]: null
+
+  try {
+    // verify that it's correct
+    const payload = jwt.verify(token, secret_key)
+    req.user = payload.sub
+    next()
+
+  } catch (err) {
+    res.status(401).json({"error": "invalid token"})
+  }
+}
+
 /*
  * Route to return a list of businesses.
  */
-router.get('/', async function (req, res) {
+router.get('/',async function (req, res) {
   /*
    * Compute page number based on optional query string parameter `page`.
    * Make sure page is within allowed bounds.
@@ -55,23 +73,28 @@ router.get('/', async function (req, res) {
 /*
  * Route to create a new business.
  */
-router.post('/', async function (req, res, next) {
-  try {
-    const business = await Business.create(req.body, BusinessClientFields)
-    res.status(201).send({ id: business.id })
-  } catch (e) {
-    if (e instanceof ValidationError) {
-      res.status(400).send({ error: e.message })
-    } else {
-      throw e
+router.post('/',requireAuthentication, async function (req, res, next) {
+  const authorizedUser = req.user
+  if (authorizedUser == req.body.ownerid) {
+    try {
+      const business = await Business.create(req.body, BusinessClientFields)
+      res.status(201).send({ id: business.id })
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        res.status(400).send({ error: e.message })
+      } else {
+        throw e
+      }
     }
+  } else {
+    res.status(403).json({"error": "Unauthorized"})
   }
-})
+  })
 
 /*
  * Route to fetch info about a specific business.
  */
-router.get('/:businessId', async function (req, res, next) {
+router.get('/:businessId',async function (req, res, next) {
   const businessId = req.params.businessId
   const business = await Business.findByPk(businessId, {
     include: [ Photo, Review ]
