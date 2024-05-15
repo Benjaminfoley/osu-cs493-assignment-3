@@ -27,8 +27,8 @@ function requireAuthentication(req, res, next) {
  * Route to create a new photo.
  */
 router.post('/', requireAuthentication,async function (req, res, next) {
-  const authorizedUser = req.user
-  if (authorizedUser == req.body.userId) {
+  const authorizedUser  = req.user == userID
+  if (authorizedUser == req.body.userId || authorizedUser == req.user.admin == true) {
     try {
       const photo = await Photo.create(req.body, PhotoClientFields)
       res.status(201).send({ id: photo.id })
@@ -62,11 +62,11 @@ router.get('/:photoId', async function (req, res, next) {
  */
 router.patch('/:photoId', requireAuthentication, async function (req, res, next) {
   const photoId = req.params.photoId
-  const authorizedUser = req.user
+  const authorizedUser  = req.user == userID
   /*
    * Update photo without allowing client to update businessId or userId.
    */
-  if (authorizedUser == req.body.userId) {
+  if (authorizedUser == req.body.userId || authorizedUser == req.user.admin == true) {
     const result = await Photo.update(req.body, {
       where: { id: photoId },
       fields: PhotoClientFields.filter(
@@ -88,8 +88,8 @@ router.patch('/:photoId', requireAuthentication, async function (req, res, next)
  */
 router.delete('/:photoId',requireAuthentication, async function (req, res, next) {
   const photoId = req.params.photoId
-  const authorizedUser = req.user
-  if (authorizedUser == req.body.userId) {
+  const authorizedUser  = req.user == userID
+  if (authorizedUser == req.body.userId || authorizedUser == req.user.admin == true) {
     const result = await Photo.destroy({ where: { id: photoId }})
     if (result > 0) {
       res.status(204).send()

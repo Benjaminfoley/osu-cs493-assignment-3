@@ -27,8 +27,8 @@ function requireAuthentication(req, res, next) {
  * Route to create a new review.
  */
 router.post('/', requireAuthentication, async function (req, res, next) {
-  const authorizedUser = req.user
-  if (authorizedUser == req.body.userId) {
+  const authorizedUser  = req.user == userID
+  if (authorizedUser == req.body.userId || authorizedUser == req.user.admin == true) {
     try {
       const review = await Review.create(req.body, ReviewClientFields)
       res.status(201).send({ id: review.id })
@@ -61,11 +61,11 @@ router.get('/:reviewId', async function (req, res, next) {
  */
 router.patch('/:reviewId', requireAuthentication,  async function (req, res, next) {
   const reviewId = req.params.reviewId
-  const authorizedUser = req.user
+  const authorizedUser  = req.user == userID
   /*
    * Update review without allowing client to update businessId or userId.
    */
-  if (authorizedUser == req.body.userId) {
+  if (authorizedUser == req.body.userId || authorizedUser == req.user.admin == true) {
     const result = await Review.update(req.body, {
       where: { id: reviewId },
       fields: ReviewClientFields.filter(
@@ -87,8 +87,8 @@ router.patch('/:reviewId', requireAuthentication,  async function (req, res, nex
  */
 router.delete('/:reviewId', requireAuthentication, async function (req, res, next) {
   const reviewId = req.params.reviewId
-  const authorizedUser = req.user
-  if (authorizedUser == req.body.userId) {
+  const authorizedUser  = req.user == userID
+  if (authorizedUser == req.body.userId || authorizedUser == req.user.admin == true) {
     const result = await Review.destroy({ where: { id: reviewId }})
     if (result > 0) {
       res.status(204).send()

@@ -34,7 +34,7 @@ const router = Router()
   * Route to register new users
 */
 
-router.post('/users/new', requireAuthentication, async function (req, res) {
+router.post('/users/new', async function (req, res) {
   try{
     const hashed_password = await bcrypt.hash(req.body.password, 8)
 
@@ -84,7 +84,7 @@ router.post('/login', async function (req, res) {
 router.get('/:userid', requireAuthentication, async function (req, res) {
   const userID = req.params.userid
   const authorized  = req.user == userID
-  if (authorized) {
+  if (authorized || req.user.admin == true) {
     const user = await User.findByPk(userid)
     res.status(200).json({ user })
   }
@@ -98,8 +98,8 @@ router.get('/:userid', requireAuthentication, async function (req, res) {
  */
 router.get('/:userId/businesses', requireAuthentication, async function (req, res) {
   const userId = req.params.userId
-  const authorized = req.user == userId
-  if (authorized) {
+  const authorizedUser = req.user == userId
+  if (authorizedUser || req.user.admin == true) {
     const userBusinesses = await Business.findAll({ where: { ownerId: userId }})
     res.status(200).json({
       businesses: userBusinesses
@@ -114,8 +114,8 @@ router.get('/:userId/businesses', requireAuthentication, async function (req, re
  */
 router.get('/:userId/reviews', requireAuthentication, async function (req, res) {
   const userId = req.params.userId
-  const authorized = req.user == userId
-  if (authorized) {
+  const authorizedUser = req.user == userId
+  if (authorizedUser || req.user.admin == true) {
     const userReviews = await Review.findAll({ where: { userId: userId }})
     res.status(200).json({
       reviews: userReviews
@@ -131,8 +131,8 @@ router.get('/:userId/reviews', requireAuthentication, async function (req, res) 
  */
 router.get('/:userId/photos', requireAuthentication, async function (req, res) {
   const userId = req.params.userId
-  const authorized = req.user == userId
-  if (authorized){
+  const authorizedUser = req.user == userId
+  if (authorizedUser || req.user.admin == true){
   const userPhotos = await Photo.findAll({ where: { userId: userId }})
   res.status(200).json({
     photos: userPhotos
