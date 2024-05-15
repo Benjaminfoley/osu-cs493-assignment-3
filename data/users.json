@@ -4,7 +4,7 @@
     "name": "Nick Arzner",
     "email": "nick@block15.com",
     "password": "hunter2",
-    "admin": false
+    "admin": true
   },
   {
     "id": "2",
