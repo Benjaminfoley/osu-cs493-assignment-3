@@ -6,6 +6,8 @@ const { Business } = require('../models/business')
 const { Photo } = require('../models/photo')
 const { Review } = require('../models/review')
 
+const secret_key = process.env.APP_SECRET_KEY;
+
 function requireAuthentication(req, res, next) {
   // Get the token from the request
   const auth_header = req.get('Authorization') || ''
@@ -79,10 +81,16 @@ router.post('/login', async function (req, res) {
 /*
   * Routes to the Specified User
 */
-router.get('/:users/{userID}', async function (req, res) {
-  const userID = req.params.userID
-  const user = await User.findByPk(userID)
-  res.status(200).json({ user })
+router.get('/:userid', requireAuthentication, async function (req, res) {
+  const userID = req.params.userid
+  const authorized  = req.user == userID
+  if (authorized) {
+    const user = await User.findByPk(userid)
+    res.status(200).json({ user })
+  }
+  else{
+    res.status(403).json({"error": "Unauthorized"})
+  }
 })
 
 /*
