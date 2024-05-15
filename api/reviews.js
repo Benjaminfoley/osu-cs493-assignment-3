@@ -59,35 +59,44 @@ router.get('/:reviewId', async function (req, res, next) {
 /*
  * Route to update a review.
  */
-router.patch('/:reviewId', async function (req, res, next) {
+router.patch('/:reviewId', requireAuthentication,  async function (req, res, next) {
   const reviewId = req.params.reviewId
-
+  const authorizedUser = req.user
   /*
    * Update review without allowing client to update businessId or userId.
    */
-  const result = await Review.update(req.body, {
-    where: { id: reviewId },
-    fields: ReviewClientFields.filter(
-      field => field !== 'businessId' && field !== 'userId'
-    )
-  })
-  if (result[0] > 0) {
-    res.status(204).send()
-  } else {
-    next()
+  if (authorizedUser == req.body.userId) {
+    const result = await Review.update(req.body, {
+      where: { id: reviewId },
+      fields: ReviewClientFields.filter(
+        field => field !== 'businessId' && field !== 'userId'
+      )
+    })
+    if (result[0] > 0) {
+      res.status(204).send()
+    } else {
+      next()
+    }
+  }else {
+    res.status(403).json({"error": "Unauthorized"})
   }
 })
 
 /*
  * Route to delete a review.
  */
-router.delete('/:reviewId', async function (req, res, next) {
+router.delete('/:reviewId', requireAuthentication, async function (req, res, next) {
   const reviewId = req.params.reviewId
-  const result = await Review.destroy({ where: { id: reviewId }})
-  if (result > 0) {
-    res.status(204).send()
-  } else {
-    next()
+  const authorizedUser = req.user
+  if (authorizedUser == req.body.userId) {
+    const result = await Review.destroy({ where: { id: reviewId }})
+    if (result > 0) {
+      res.status(204).send()
+    } else {
+      next()
+    }
+  }else {
+    res.status(403).json({"error": "Unauthorized"})
   }
 })
 
