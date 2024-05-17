@@ -2,9 +2,12 @@ const { Router } = require('express')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
+const { Users } = require('../models/users')
 const { Business } = require('../models/business')
 const { Photo } = require('../models/photo')
 const { Review } = require('../models/review')
+const sequelize = require('sequelize')
+const { hash } = require('../lib/hash')
 
 const secret_key = process.env.APP_SECRET_KEY;
 
@@ -26,25 +29,20 @@ function requireAuthentication(req, res, next) {
   }
 }
 
-
-
 const router = Router()
 
 /*
   * Route to register new users
 */
 
-router.post('/users/new', async function (req, res) {
+router.post('/new', async function (req, res) {
   try{
-    const hashed_password = await bcrypt.hash(req.body.password, 8)
-
-    const [ results ] = await mysqlPool.query(`INSERT INTO users
-      (name, email, password) VALUES (?, ?, ?);`,
-      [req.body.name, req.body.email, hashed_password])
-
+    const results = await Users.build ({username:req.body.username, email:req.body.email, password: await hash(req.body.password), admin:req.body.admin})
+    await results.save()
     res.json({"status": "ok"})
   } catch(err) {
-    res.json({"status": "error", "error": err}) 
+    res.json({"status": "error", "error": err})
+    console.log(err)
   }
 })
 
@@ -58,19 +56,16 @@ function generateAuthToken(user_id) {
   * Route to register new users
 */
 router.post('/login', async function (req, res) {
-  const [ results ] = await mysqlPool.query(
-    "SELECT * FROM users WHERE name = ?",
-    [req.body.name])
-
-  if (!results[0]) {
+  const  results  = await Users.findOne({where: {username: req.body.username}})
+  if (!results) {
     res.json({"status": "error", "error": "login failed"})
     return
   }
 
-  const authenticated = await bcrypt.compare(req.body.password, results[0].password)
+  const authenticated = await bcrypt.compare(req.body.password, results.password)
 
   if (authenticated) {
-    const token = generateAuthToken(results[0].id)
+    const token = generateAuthToken(results.id)
     res.json({"status": "ok", "token": token})
   }
   else {
@@ -85,7 +80,7 @@ router.get('/:userid', requireAuthentication, async function (req, res) {
   const userID = req.params.userid
   const authorized  = req.user == userID
   if (authorized || req.user.admin == true) {
-    const user = await User.findByPk(userid)
+    const user = await Users.findByPk(userid)
     res.status(200).json({ user })
   }
   else{

@@ -2,7 +2,7 @@
  * This file contains a simple script to populate the database with initial
  * data from the files in the data/ directory.
  */
-
+const { hash } = require('./lib/hash')
 const sequelize = require('./lib/sequelize')
 const { Business, BusinessClientFields } = require('./models/business')
 const { Photo, PhotoClientFields } = require('./models/photo')
@@ -18,5 +18,8 @@ sequelize.sync().then(async function () {
   await Business.bulkCreate(businessData, { fields: BusinessClientFields })
   await Photo.bulkCreate(photoData, { fields: PhotoClientFields })
   await Review.bulkCreate(reviewData, { fields: ReviewClientFields })
+  for(let i = 0; i < userData.length; i++){
+    userData[i].password = await hash(userData[i].password)
+  }
   await Users.bulkCreate(userData, { fields: UserClientFields })
-})
+}).catch(() => {})

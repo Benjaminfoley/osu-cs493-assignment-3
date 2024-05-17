@@ -1,112 +1,112 @@
 [
   {
     "id": "1",
-    "name": "Nick Arzner",
+    "username": "Nick Arzner",
     "email": "nick@block15.com",
     "password": "hunter2",
     "admin": true
   },
   {
     "id": "2",
-    "name": "Tori Lockwood",
+    "username": "Tori Lockwood",
     "email": "tori@robnetts.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "3",
-    "name": "Joel Rea",
+    "username": "Joel Rea",
     "email": "joel@lickspigot.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "4",
-    "name": "The Owners",
+    "username": "The Owners",
     "email": "owners@firstalt.coop",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "5",
-    "name": "Kim Marchesi",
+    "username": "Kim Marchesi",
     "email": "kim@localboyzhawaiiancafe.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "6",
-    "name": "William McCanless",
+    "username": "William McCanless",
     "email": "william@interzoneorganic1.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "7",
-    "name": "Paul Turner",
+    "username": "Paul Turner",
     "email": "paul@darksidecinema.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "8",
-    "name": "Cody Utzman",
+    "username": "Cody Utzman",
     "email": "cody@bodhibakery.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "9",
-    "name": "Winco Employees",
+    "username": "Winco Employees",
     "email": "employees@wincofoods.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "10",
-    "name": "Philip Wilson",
+    "username": "Philip Wilson",
     "email": "philib@bookbin.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "11",
-    "name": "Fred Meyer",
+    "username": "Fred Meyer",
     "email": "fred@fredmeyer.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "12",
-    "name": "Mike Easter",
+    "username": "Mike Easter",
     "email": "mike@cyclotopia.com",
     "password": "hunter2",
     "admin": false
   },
   { 
     "id": "13",
-    "name": "Casey Collett",
+    "username": "Casey Collett",
     "email": "casey@oregoncoffeeandtea.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "14",
-    "name": "John Semadeni",
+    "username": "John Semadeni",
     "email": "john@corvalliscycleryinc.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "15",
-    "name": "Alex Spaeth",
+    "username": "Alex Spaeth",
     "email": "alex@spaethlumber.com",
     "password": "hunter2",
     "admin": false
   },
   {
     "id": "16",
-    "name": "Tristan James",
+    "username": "Tristan James",
     "email": "tristan@newmorningbakery.com",
     "password": "hunter2",
     "admin": false
