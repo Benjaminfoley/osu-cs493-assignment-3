@@ -77,9 +77,9 @@ router.get('/:userid', requireAuthentication, async function (req, res) {
  * Route to list all of a user's businesses.
  */
 router.get('/:userId/businesses', requireAuthentication, async function (req, res) {
-  const userId = req.params.userId
-  const authorizedUser = req.user == userId
-  if (authorizedUser || req.user.admin == true) {
+  const userID = parseInt(req.params.userid)
+  const authorized  = req.user == userID
+  if (authorized || req.user.admin == true) {
     const userBusinesses = await Business.findAll({ where: { ownerId: userId }})
     res.status(200).json({
       businesses: userBusinesses
@@ -93,9 +93,9 @@ router.get('/:userId/businesses', requireAuthentication, async function (req, re
  * Route to list all of a user's reviews.
  */
 router.get('/:userId/reviews', requireAuthentication, async function (req, res) {
-  const userId = req.params.userId
-  const authorizedUser = req.user == userId
-  if (authorizedUser || req.user.admin == true) {
+  const userID = parseInt(req.params.userid)
+  const authorized  = req.user == userID
+  if (authorized || req.user.admin == true) {
     const userReviews = await Review.findAll({ where: { userId: userId }})
     res.status(200).json({
       reviews: userReviews
@@ -110,9 +110,9 @@ router.get('/:userId/reviews', requireAuthentication, async function (req, res) 
  * Route to list all of a user's photos.
  */
 router.get('/:userId/photos', requireAuthentication, async function (req, res) {
-  const userId = req.params.userId
-  const authorizedUser = req.user == userId
-  if (authorizedUser || req.user.admin == true){
+  const userID = parseInt(req.params.userid)
+  const authorized  = req.user == userID
+  if (authorized || req.user.admin == true){
   const userPhotos = await Photo.findAll({ where: { userId: userId }})
   res.status(200).json({
     photos: userPhotos

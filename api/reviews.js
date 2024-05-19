@@ -11,8 +11,9 @@ const router = Router()
  * Route to create a new review.
  */
 router.post('/', requireAuthentication, async function (req, res, next) {
-  const authorizedUser  = req.user == userID
-  if (authorizedUser == req.body.userId || authorizedUser == req.user.admin == true) {
+  const userID = parseInt(req.params.userid)
+  const authorized  = req.user == userID
+  if (authorized || req.user.admin == true) {
     try {
       const review = await Review.create(req.body, ReviewClientFields)
       res.status(201).send({ id: review.id })
@@ -44,12 +45,12 @@ router.get('/:reviewId', async function (req, res, next) {
  * Route to update a review.
  */
 router.patch('/:reviewId', requireAuthentication,  async function (req, res, next) {
-  const reviewId = req.params.reviewId
-  const authorizedUser  = req.user == userID
+  const userID = parseInt(req.params.userid)
+  const authorized  = req.user == userID
   /*
    * Update review without allowing client to update businessId or userId.
    */
-  if (authorizedUser == req.body.userId || authorizedUser == req.user.admin == true) {
+  if (authorized || req.user.admin == true) {
     const result = await Review.update(req.body, {
       where: { id: reviewId },
       fields: ReviewClientFields.filter(
@@ -70,9 +71,9 @@ router.patch('/:reviewId', requireAuthentication,  async function (req, res, nex
  * Route to delete a review.
  */
 router.delete('/:reviewId', requireAuthentication, async function (req, res, next) {
-  const reviewId = req.params.reviewId
-  const authorizedUser  = req.user == userID
-  if (authorizedUser == req.body.userId || authorizedUser == req.user.admin == true) {
+  const userID = parseInt(req.params.userid)
+  const authorized  = req.user == userID
+  if (authorized || req.user.admin == true) {
     const result = await Review.destroy({ where: { id: reviewId }})
     if (result > 0) {
       res.status(204).send()
