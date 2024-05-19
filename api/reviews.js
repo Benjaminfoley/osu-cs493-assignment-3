@@ -16,7 +16,6 @@ router.post('/', requireAuthentication, async function (req, res, next) {
   if (authorized || req.user.admin == true) {
     try {
       const review = await Review.create(req.body, ReviewClientFields)
-      await review.save()
       res.status(201).send({ id: review.id })
     } catch (e) {
       if (e instanceof ValidationError) {
