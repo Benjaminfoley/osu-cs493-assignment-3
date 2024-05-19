@@ -2,26 +2,10 @@ const { Router } = require('express')
 const { ValidationError } = require('sequelize')
 
 const { Review, ReviewClientFields } = require('../models/review')
+const { requireAuthentication } = require('../lib/auth')
 
 const router = Router()
 
-function requireAuthentication(req, res, next) {
-  // Get the token from the request
-  const auth_header = req.get('Authorization') || ''
-  const header_parts = auth_header.split(' ')
-
-  const token = header_parts[0] == "Bearer"? header_parts[1]: null
-
-  try {
-    // verify that it's correct
-    const payload = jwt.verify(token, secret_key)
-    req.user = payload.sub
-    next()
-
-  } catch (err) {
-    res.status(401).json({"error": "invalid token"})
-  }
-}
 
 /*
  * Route to create a new review.

@@ -8,26 +8,9 @@ const { Photo } = require('../models/photo')
 const { Review } = require('../models/review')
 const sequelize = require('sequelize')
 const { hash } = require('../lib/hash')
+const { requireAuthentication } = require('../lib/auth')
 
 const secret_key = process.env.APP_SECRET_KEY;
-
-function requireAuthentication(req, res, next) {
-  // Get the token from the request
-  const auth_header = req.get('Authorization') || ''
-  const header_parts = auth_header.split(' ')
-
-  const token = header_parts[0] == "Bearer"? header_parts[1]: null
-
-  try {
-    // verify that it's correct
-    const payload = jwt.verify(token, secret_key)
-    req.user = payload.sub
-    next()
-
-  } catch (err) {
-    res.status(401).json({"error": "invalid token"})
-  }
-}
 
 const router = Router()
 
@@ -39,7 +22,9 @@ router.post('/new', async function (req, res) {
   try{
     const results = await Users.build ({username:req.body.username, email:req.body.email, password: await hash(req.body.password), admin:req.body.admin})
     await results.save()
-    res.json({"status": "ok"})
+    const token = generateAuthToken(results.id)
+    res.json({"status": "ok", "Token":token, "UserID": results.id})
+
   } catch(err) {
     res.json({"status": "error", "error": err})
     console.log(err)
@@ -77,10 +62,10 @@ router.post('/login', async function (req, res) {
   * Routes to the Specified User
 */
 router.get('/:userid', requireAuthentication, async function (req, res) {
-  const userID = req.params.userid
+  const userID = parseInt(req.params.userid)
   const authorized  = req.user == userID
   if (authorized || req.user.admin == true) {
-    const user = await Users.findByPk(userid)
+    const user = await Users.findByPk(userID)
     res.status(200).json({ user })
   }
   else{
