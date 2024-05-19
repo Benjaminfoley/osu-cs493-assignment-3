@@ -57,7 +57,7 @@ router.get('/',async function (req, res) {
  * Route to create a new business.
  */
 router.post('/',requireAuthentication, async function (req, res, next) {
-  const userID = parseInt(req.params.userid)
+  const userID = parseInt(req.body.userId)
   const authorized  = req.user == userID
   if (authorized || req.user.admin == true) {
     try {
@@ -94,7 +94,7 @@ router.get('/:businessId',async function (req, res, next) {
  * Route to update data for a business.
  */
 router.patch('/:businessId', requireAuthentication, async function (req, res, next) {
-  const userID = parseInt(req.params.userid)
+  const userID = parseInt(req.body.userId)
   const authorized  = req.user == userID
   if (authorized || req.user.admin == true) {
     const result = await Business.update(req.body, {
@@ -115,7 +115,7 @@ router.patch('/:businessId', requireAuthentication, async function (req, res, ne
  * Route to delete a business.
  */
 router.delete('/:businessId', requireAuthentication, async function (req, res, next) {
-  const userID = parseInt(req.params.userid)
+  const userID = parseInt(req.body.userId)
   const authorized  = req.user == userID
   if (authorized || req.user.admin == true) {
     const result = await Business.destroy({ where: { id: businessId }})
